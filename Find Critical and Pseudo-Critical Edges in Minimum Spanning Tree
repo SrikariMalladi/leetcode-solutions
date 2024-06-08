@@ -1,0 +1,99 @@
+import java.util.*;
+
+class Solution {
+    private class DisjointSet {
+        private Integer[] parent, size;
+        public int maxComponentSize;
+
+        public DisjointSet(int n) {
+            parent = new Integer[n];
+            size = new Integer[n];
+            Arrays.fill(size, 1);
+            maxComponentSize = 0;
+            for (int i = 0; i < n; i++) {
+                parent[i] = i;
+            }
+        }
+
+        public int find(int x) {
+            if (parent[x] == x) return x;
+            return parent[x] = find(parent[x]);
+        }
+
+        public void union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            if (rootX != rootY) {
+                if (size[rootX] < size[rootY]) {
+                    swap(rootX, rootY);
+                }
+                parent[rootY] = rootX;
+                size[rootX] += size[rootY];
+                maxComponentSize = Math.max(maxComponentSize, size[rootX]);
+            }
+        }
+    }
+
+    private void swap(int a, int b) {
+        int temp = a;
+        a = b;
+        b = temp;
+    }
+
+    public List<List<Integer>> findCriticalAndPseudoCriticalEdges(int n, int[][] edges) {
+        int edgeCount = edges.length;
+        int[][] edgeList = new int[edgeCount][4];
+        for (int i = 0; i < edgeCount; i++) {
+            edgeList[i][0] = edges[i][0];
+            edgeList[i][1] = edges[i][1];
+            edgeList[i][2] = edges[i][2];
+            edgeList[i][3] = i;
+        }
+        Arrays.sort(edgeList, Comparator.comparingInt(a -> a[2]));
+
+        DisjointSet originalMST = new DisjointSet(n);
+        int originalWeight = 0;
+        for (int i = 0; i < edgeCount; i++) {
+            int[] edge = edgeList[i];
+            if (originalMST.find(edge[0]) != originalMST.find(edge[1])) {
+                originalMST.union(edge[0], edge[1]);
+                originalWeight += edge[2];
+            }
+        }
+
+        List<List<Integer>> result = new ArrayList<>();
+        result.add(new ArrayList<>());
+        result.add(new ArrayList<>());
+        for (int i = 0; i < edgeCount; i++) {
+            DisjointSet newMST = new DisjointSet(n);
+            int newWeight = 0;
+            for (int j = 0; j < edgeCount; j++) {
+                if (j == i) continue;
+                int[] edge = edgeList[j];
+                if (newMST.find(edge[0]) != newMST.find(edge[1])) {
+                    newMST.union(edge[0], edge[1]);
+                    newWeight += edge[2];
+                }
+            }
+            if (newMST.maxComponentSize < n || newWeight > originalWeight) {
+                result.get(0).add(edgeList[i][3]);
+            } else {
+                DisjointSet newMSTWithEdge = new DisjointSet(n);
+                newMSTWithEdge.union(edgeList[i][0], edgeList[i][1]);
+                int newWeightWithEdge = edgeList[i][2];
+                for (int j = 0; j < edgeCount; j++) {
+                    if (j == i) continue;
+                    int[] edge = edgeList[j];
+                    if (newMSTWithEdge.find(edge[0]) != newMSTWithEdge.find(edge[1])) {
+                        newMSTWithEdge.union(edge[0], edge[1]);
+                        newWeightWithEdge += edge[2];
+                    }
+                }
+                if (newMSTWithEdge.maxComponentSize == n && newWeightWithEdge == originalWeight) {
+                    result.get(1).add(edgeList[i][3]);
+                }
+            }
+        }
+        return result;
+    }
+}
