@@ -4,7 +4,7 @@ class Solution {
         int max = Integer.MIN_VALUE;
         
         // Find the maximum number of candies any kid currently has
-        for (int candy : candies) {
+        for (int candy: candies) {
             if (candy > max) {
                 max = candy;
             }
@@ -14,7 +14,7 @@ class Solution {
 
         // Check if each kid can have the greatest number of candies
         for (int i = 0; i < n; i++) {
-            if (candies[i] + extraCandies >= max) {
+            if (candies[i] + extra candies >= max) {
                 list.add(true);
             } else {
                 list.add(false);
