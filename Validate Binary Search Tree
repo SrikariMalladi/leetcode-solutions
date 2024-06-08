@@ -1,0 +1,39 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+bool isSubTreeLower(int num,struct TreeNode *root){ //to check if values in all nodes in the subtree are lower than num
+    if(root==NULL) return true;
+    if(root->val<num){
+        return isSubTreeLower(num,root->left) && isSubTreeLower(num,root->right);
+    }else{
+        return false;
+    }
+}
+bool isSubTreeGreater(int num,struct TreeNode *root){ //to check if values in all nodes in the subtree are greater than num
+    if(root==NULL) return true;
+    if(root->val>num){
+        return isSubTreeGreater(num,root->left) && isSubTreeGreater(num,root->right);
+    }else{
+        return false;
+    }
+}
+bool isValidBST(struct TreeNode* root) {
+    if(root==NULL) return true; //case: root==NULL
+    if(root->left==NULL && root->right==NULL) return true; //case: root has no children
+    if(root->left==NULL){ //case: root has only one child(right child)
+        return root->val<root->right->val && isValidBST(root->right) && isSubTreeGreater(root->val,root->right);
+    }
+    if(root->right==NULL){ //case: root has only one child(left child)
+        return root->val>root->left->val && isValidBST(root->left) && isSubTreeLower(root->val,root->left);
+    }
+    if(root->left->val<root->val && root->right->val>root->val){ //case: root has 2 children
+        return isValidBST(root->left) && isValidBST(root->right) && isSubTreeLower(root->val,root->left) && isSubTreeGreater(root->val,root->right);
+    }else{
+        return false;
+    }
+}
